@@ -38,48 +38,9 @@
   </header>
 
   <main id="top">
-    <!-- ============ HERO ============ -->
-    <section class="hero">
-      <div class="hero-top mono">
-        <span data-i18n="hero.k">Skupina QIK — mateřská společnost QIK a.s.</span>
-        <span>Praha · CZ</span>
-      </div>
-      <h1 class="hero-title">
-        <span class="ht-line"><span class="ht" data-i18n="hero.l1">Od studie</span></span>
-        <span class="ht-line"><span class="ht ht-2" data-i18n="hero.l2">po klíč.</span></span>
-      </h1>
-      <div class="hero-mid">
-        <p class="hero-lede" data-i18n="hero.lede">Šest společností, jedna skupina. Projektujeme, digitalizujeme, vyrábíme ocel, stavíme a zařizujeme — celý životní cyklus stavby pod jednou střechou.</p>
-        <a href="#build" class="hero-cta mono"><span data-i18n="hero.cta">Projděte stavbu</span><i>↓</i></a>
-      </div>
-      <div class="skyline">
-        <a class="tower" href="#co-as" style="--h:.74"><span data-pg="as"></span><b class="mono">a.s.</b></a>
-        <a class="tower" href="#co-services" style="--h:.92"><span data-pg="services"></span><b class="mono">Services</b></a>
-        <a class="tower" href="#co-solutions" style="--h:.66"><span data-pg="solutions"></span><b class="mono">Solutions</b></a>
-        <a class="tower" href="#co-metal" style="--h:.84"><span data-pg="metal"></span><b class="mono">Metal</b></a>
-        <a class="tower" href="#co-realizace" style="--h:1"><span data-pg="realizace"></span><b class="mono">Realizace</b></a>
-        <a class="tower" href="#co-home" style="--h:.88"><span data-pg="home"></span><b class="mono">Home</b></a>
-      </div>
-    </section>
-
-    <!-- ============ WAVE MARQUEE ============ -->
-    <section class="wave" aria-label="Služby">
-      <div class="wave-track" data-i18n="wave">Projektový management · Studie · Projektová dokumentace · Inženýring · Rozpočty · Technický dozor · BIM · AI · Zemní práce · Betonářské práce · Tesařské práce · Ocelové konstrukce · Žárový pozink · Interiérový design · Smart living · Výroba nábytku · Správa budov ·</div>
-    </section>
-
-    <!-- ============ INTRO ============ -->
-    <section class="intro">
-      <div class="label mono"><span>01</span><span data-i18n="intro.l">Skupina</span></div>
-      <p class="intro-text" data-i18n="intro.t">Sdružujeme dynamicky se rozvíjející společnosti, které díky své synergii přinášejí efektivní řešení. Od rezidenčních projektů po velké komerční a infrastrukturní stavby. Jeden partner místo deseti dodavatelů.</p>
-      <div class="stats">
-        <div class="stat"><b data-to="6">0</b><span data-i18n="st.1">společností ve skupině</span></div>
-        <div class="stat"><b data-to="30" data-suf="+">0</b><span data-i18n="st.2">služeb od studie po správu</span></div>
-        <div class="stat"><b data-to="7" data-suf=" t">0</b><span data-i18n="st.3">ocelové konstrukce z vlastní haly</span></div>
-        <div class="stat"><b data-to="1">0</b><span data-i18n="st.4">partner pro celou stavbu</span></div>
-      </div>
-    </section>
-
-    <!-- ============ BUILD STORY (pinned) ============ -->
+    <!-- ============ HERO + BUILD STORY (one pinned scene) ============
+         Load: the building time-lapses to completion next to the hero copy.
+         Scroll: time rewinds to the empty plot, then five chapters rebuild it. -->
     <section class="build" id="build">
       <div class="build-pin">
         <div class="build-rail mono">
@@ -91,6 +52,26 @@
           <button data-ch="4"><b>05</b><span>Home</span></button>
         </div>
         <div class="build-copy">
+          <div class="hero-copy">
+            <p class="hc-kicker mono"><span data-i18n="hero.k">Skupina QIK</span><span>Praha · CZ</span></p>
+            <h1 class="hero-title">
+              <span class="ht-line"><span class="ht" data-i18n="hero.l1">Od studie</span></span>
+              <span class="ht-line"><span class="ht ht-2" data-i18n="hero.l2">po klíč.</span></span>
+            </h1>
+            <p class="hc-lede" data-i18n="hero.lede">Šest společností, jedna skupina. Projektujeme, digitalizujeme, vyrábíme ocel, stavíme a zařizujeme. Jeden partner místo deseti dodavatelů.</p>
+            <dl class="stamp">
+              <div><dt class="mono" data-i18n="st.1">Společností</dt><dd data-to="6">0</dd></div>
+              <div><dt class="mono" data-i18n="st.2">Služeb</dt><dd data-to="30" data-suf="+">0</dd></div>
+              <div><dt class="mono" data-i18n="st.3">Ocel do</dt><dd data-to="7" data-suf=" t">0</dd></div>
+              <div><dt class="mono" data-i18n="st.4">Partner</dt><dd data-to="1">0</dd></div>
+            </dl>
+            <p class="hc-scroll mono"><i></i><span data-i18n="hero.cta">Scrollujte — postavíme ji znovu, krok za krokem</span></p>
+          </div>
+          <div class="rw" aria-hidden="true">
+            <span class="rw-ico mono">↺ <span data-i18n="rw.k">Přetáčíme</span></span>
+            <b data-i18n="rw.t">Zpět na prázdný pozemek.</b>
+            <span class="rw-sub" data-i18n="rw.s">A teď ji postavíme znovu — pomalu, firmu po firmě.</span>
+          </div>
           <article class="ch">
             <div class="ch-head"><span class="ch-pg" data-pg="services"></span><span class="mono">QIK Services s.r.o.</span></div>
             <h3 data-i18n="ch1.t">Nejdřív přemýšlíme.</h3>
@@ -134,7 +115,7 @@
 
     <!-- ============ COMPANIES ============ -->
     <section class="companies dark" id="companies">
-      <div class="label mono"><span>02</span><span data-i18n="co.l">Společnosti</span></div>
+      <div class="label mono"><span>01</span><span data-i18n="co.l">Společnosti</span></div>
       <h2 class="h2"><span class="split" data-i18n="co.t">Šest firem. <span class="o">Jedna stavba.</span></span></h2>
       <div class="co-list">
         <article class="co" id="co-as">
@@ -187,7 +168,7 @@
     <section class="metal" id="metal">
       <div class="metal-pin">
         <div class="metal-copy">
-          <div class="label mono"><span>03</span><span data-i18n="me.l">Výroba</span></div>
+          <div class="label mono"><span>02</span><span data-i18n="me.l">Výroba</span></div>
           <div class="ton"><b class="ton-n">0</b><span class="ton-u">kg</span></div>
           <p data-i18n="me.d">Tolik zvedne naše výrobní hala. Konstrukce do sedmi tun řežeme, svařujeme, tryskáme a povrchově upravujeme pod jednou střechou.</p>
           <ol class="steps mono">
@@ -224,7 +205,7 @@
 
     <!-- ============ CONTACT ============ -->
     <section class="contact" id="contact">
-      <div class="label mono"><span>04</span><span data-i18n="ct.l">Kontakt</span></div>
+      <div class="label mono"><span>03</span><span data-i18n="ct.l">Kontakt</span></div>
       <h2 class="mega"><span class="mega-l" data-i18n="ct.1">Postavme</span><span class="mega-l" data-i18n="ct.2">to spolu.</span></h2>
       <div class="contact-grid">
         <div class="mono">

@@ -343,7 +343,9 @@ export class BuildScene {
     this.add(9, 0, 0, (P, time) => {
       const t = P[1];
       if (t <= 0) return;
-      const fade = 1 - clamp(P[2] * 0.6 + P[3] * 0.4) * 0.85;
+      // faint guide while the frame and walls go up, gone entirely once people move in
+      const fade = (1 - clamp(P[2] * 0.6 + P[3] * 0.4) * 0.85) * (1 - clamp(P[4] * 2));
+      if (fade <= 0.001) return;
       const col = (a) => `rgba(${C.accent},${a * fade})`;
       for (let f = 0; f <= FLOORS; f++) {
         const k = ease(clamp(t * 1.6 - f * 0.18));

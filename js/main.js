@@ -63,8 +63,6 @@ const splits = () => {
   $$(".ht").forEach((el) => (el._c = splitChars(el)));
   $$(".mega-l").forEach((el) => (el._c = splitChars(el)));
   $$(".h2 .split").forEach((el) => (el._c = splitWords(el)));
-  $$(".intro-text").forEach((el) => (el._c = splitWords(el, "iw")));
-  buildWave();
 };
 function setLang(l) {
   if (l === lang) return;
@@ -73,7 +71,6 @@ function setLang(l) {
   i18nEls.forEach((el) => (el.innerHTML = l === "en" ? EN[el.dataset.i18n] ?? el.dataset.cs : el.dataset.cs));
   splits();
   $$(".ht, .mega-l").forEach((el) => gsap.fromTo(el._c, { yPercent: 100 }, { yPercent: 0, stagger: 0.02, duration: 0.8, ease: "expo.out" }));
-  gsap.set($(".intro-text")._c, { opacity: 1 });
   $$(".lang button").forEach((b) => b.classList.toggle("on", b.dataset.lang === l));
   document.title = l === "en" ? "QIK Group — From sketch to keys" : "Skupina QIK — Od studie po klíč";
   showChapter(chapter, true);
@@ -81,44 +78,7 @@ function setLang(l) {
 }
 $$(".lang button").forEach((b) => b.addEventListener("click", () => setLang(b.dataset.lang)));
 
-/* ---------- wave marquee (variable width wave) ---------- */
-let waveWords = [];
-function buildWave() {
-  const track = $(".wave-track");
-  const src = track.textContent.trim();
-  track.innerHTML = "";
-  waveWords = [];
-  for (let k = 0; k < 2; k++) {
-    src.split(" · ").forEach((txt) => {
-      txt = txt.replace(/·$/, "").trim();
-      if (!txt) return;
-      const w = document.createElement("span"); w.className = "wd"; w.textContent = txt;
-      const d = document.createElement("span"); d.className = "wd dot"; d.textContent = "·";
-      track.append(w, d); waveWords.push(w, d);
-    });
-  }
-}
 splits();
-
-let waveX = 0;
-gsap.ticker.add((t, dms) => {
-  const track = $(".wave-track");
-  const half = track.scrollWidth / 2;
-  if (!half) return;
-  const v = lenis ? lenis.velocity : 0;
-  waveX -= (reduced ? 0 : 0.9 + Math.abs(v) * 0.6) * (dms / 16.7);
-  if (-waveX > half) waveX += half;
-  track.style.transform = `translate3d(${waveX}px,0,0)`;
-  const W = innerWidth;
-  // read every position first, then write — one layout per frame instead of one per word
-  const centres = waveWords.map((w) => w.offsetLeft + waveX + w.offsetWidth / 2);
-  waveWords.forEach((w, i) => {
-    const r = centres[i];
-    if (r < -300 || r > W + 300) return;
-    const s = 0.5 + 0.5 * Math.sin((r / W) * Math.PI * 2 - t * 1.2);
-    w.style.setProperty("--w", (62 + s * 63).toFixed(1));
-  });
-});
 
 /* ---------- smooth scroll ---------- */
 let lenis = null;
@@ -164,7 +124,8 @@ function proximity(zone, getChars, min = 62, max = 125, radius = 260) {
     });
   });
 }
-proximity($(".hero"), () => $$(".ht .c"));
+// hero type is condensed at rest and widens under the cursor
+proximity($(".hero-copy"), () => $$(".ht .c"), 100, 62, 160);
 proximity($(".contact"), () => $$(".mega-l .c"), 62, 100, 220);
 
 /* ---------- nav ---------- */
@@ -186,10 +147,18 @@ const navDarkTriggers = () => $$(".dark, .careers").forEach((el) => ScrollTrigge
   onToggle: (s) => nav.classList.toggle("on-dark", s.isActive),
 }));
 
-/* ---------- build story ---------- */
+/* ---------- hero + build story (one pinned scene) ----------
+   Pin progress q:   0 ──── REWIND ── START ─────────────── 1
+   scene p:          5  →→→   0        0  →→→ chapters →→→ 5
+   On load p follows a time-lapse (introP 0 → 5), so the hero shows the
+   building assembling itself; scrolling then rewinds it and rebuilds it slowly. */
 const scene = new BuildScene($(".iso"));
 const chapters = $$(".ch"), railBtns = $$(".build-rail button");
-let chapter = -1, pTarget = 0, pNow = 0, buildVisible = false;
+const heroCopy = $(".hero-copy"), rail = $(".build-rail");
+const REWIND = 0.1, START = 0.12;
+const rw = $(".rw");
+const introP = { v: 0 };
+let chapter = -1, q = 0, pNow = 0, buildVisible = true;
 
 function showChapter(i, force = false) {
   if (i === chapter && !force) return;
@@ -197,31 +166,51 @@ function showChapter(i, force = false) {
   chapter = i;
   const next = chapters[i];
   if (prev && prev !== next) { prev.classList.remove("on"); gsap.to(prev, { opacity: 0, y: -30, duration: 0.45, ease: "power2.in", overwrite: true }); }
+  railBtns.forEach((b, k) => { b.classList.toggle("on", k === i); b.classList.toggle("done", i >= 0 && k < i); });
+  if (!next) return;
   next.classList.add("on");
   gsap.fromTo(next, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.8, delay: prev && prev !== next ? 0.2 : 0, ease: "expo.out", overwrite: true });
   gsap.fromTo($("h3", next), { "--w": 62 }, { "--w": 85, duration: 1.2, ease: "expo.out", delay: 0.2 });
   gsap.fromTo($$("li", next), { x: -20, opacity: 0 }, { x: 0, opacity: 1, stagger: 0.06, duration: 0.6, delay: 0.35, ease: "power3.out" });
-  railBtns.forEach((b, k) => { b.classList.toggle("on", k === i); b.classList.toggle("done", k < i); });
-  $(".hud-ph").textContent = String(i + 1).padStart(2, "0");
 }
 
 const buildST = ScrollTrigger.create({
-  trigger: ".build", pin: ".build-pin", start: "top top", end: "+=520%", scrub: true,
-  onUpdate(self) { pTarget = Math.min(5, self.progress * 5.25); },
+  trigger: ".build", pin: ".build-pin", start: "top top", end: "+=620%", scrub: true,
+  onUpdate(self) { q = self.progress; },
 });
 ScrollTrigger.create({ trigger: ".build", start: "top bottom", end: "bottom top", onToggle: (s) => (buildVisible = s.isActive) });
 railBtns.forEach((b, i) => b.addEventListener("click", () => {
-  const y = buildST.start + ((i + 0.75) / 5.25) * (buildST.end - buildST.start);
-  scrollTo(y);
+  const f = START + ((i + 0.75) / 5.25) * (1 - START);
+  scrollTo(buildST.start + f * (buildST.end - buildST.start));
 }));
-showChapter(0);
+
 gsap.ticker.add((time) => {
   if (!buildVisible) return;
-  pNow += (pTarget - pNow) * (reduced ? 1 : 0.12);
+  let target;
+  if (q < REWIND) target = 5 * (1 - q / REWIND);
+  else if (q < START) target = 0;
+  else target = Math.min(5, ((q - START) / (1 - START)) * 5.25);
+  if (q >= START && introP.v < 5) { gsap.killTweensOf(introP); introP.v = 5; }
+  if (q < START) target = Math.min(introP.v, target);
+  pNow += (target - pNow) * (reduced ? 1 : 0.12);
   scene.setProgress(pNow);
   scene.frame(time);
-  showChapter(Math.min(4, Math.floor(pNow + 0.02)));
-  $(".rail-line i").style.transform = `scaleX(${pNow / 5})`;
+
+  // hero copy leaves as the rewind starts; the rail arrives as it ends
+  const h = clamp(0, 1, 1 - q / (REWIND * 0.5));
+  heroCopy.style.opacity = h;
+  heroCopy.style.transform = `translateY(${(1 - h) * -40}px)`;
+  heroCopy.style.visibility = h > 0.01 ? "visible" : "hidden";
+  rail.style.opacity = clamp(0, 1, (q - REWIND * 0.5) / (START - REWIND * 0.5));
+  // rewind caption: fades in after the hero leaves, out as chapter 01 arrives
+  const r = Math.min(clamp(0, 1, (q - REWIND * 0.35) / (REWIND * 0.2)), clamp(0, 1, (REWIND * 0.95 - q) / (REWIND * 0.15)));
+  rw.style.opacity = r;
+  rw.style.visibility = r > 0.01 ? "visible" : "hidden";
+  rw.style.transform = `translateY(${(1 - r) * 20}px)`;
+  showChapter(q < REWIND * 0.95 ? -1 : q < START ? 0 : Math.min(4, Math.floor(pNow + 0.02)));
+
+  $(".rail-line i").style.transform = `scaleX(${q < START ? 0 : pNow / 5})`;
+  $(".hud-ph").textContent = String(Math.min(5, Math.floor(pNow) + 1)).padStart(2, "0");
   $(".hud-pct").textContent = Math.round((pNow / 5) * 100);
 });
 
@@ -252,18 +241,6 @@ function scrollAnims() {
   // section labels + headings
   $$(".h2 .split").forEach((el) => gsap.from(el._c, { yPercent: 110, duration: 1.1, stagger: 0.07, ease: "expo.out", scrollTrigger: { trigger: el, start: "top 85%", once: true } }));
   $$(".label").forEach((el) => gsap.from(el, { opacity: 0, y: 20, duration: 0.8, scrollTrigger: { trigger: el, start: "top 90%", once: true } }));
-
-  // intro words + width breathe
-  const it = $(".intro-text");
-  gsap.to(it._c, { opacity: 1, stagger: 0.1, ease: "none", scrollTrigger: { trigger: it, start: "top 80%", end: "bottom 50%", scrub: true } });
-  gsap.fromTo(it, { "--w": 72 }, { "--w": 100, ease: "none", scrollTrigger: { trigger: it, start: "top 90%", end: "bottom 40%", scrub: true } });
-
-  // stats
-  $$(".stat b").forEach((b) => {
-    const o = { v: 0 };
-    ScrollTrigger.create({ trigger: b, start: "top 90%", once: true, onEnter: () => gsap.to(o, { v: +b.dataset.to, duration: 1.8, ease: "power3.out", onUpdate: () => (b.textContent = Math.round(o.v) + (b.dataset.suf || "")) }) });
-  });
-  gsap.from(".stat", { y: 40, opacity: 0, stagger: 0.1, duration: 1, ease: "power3.out", scrollTrigger: { trigger: ".stats", start: "top 90%", once: true } });
 
   // companies rows
   gsap.from(".co", { y: 50, opacity: 0, stagger: 0.08, duration: 1, ease: "power3.out", scrollTrigger: { trigger: ".co-list", start: "top 85%", once: true } });
@@ -305,11 +282,17 @@ function intro() {
   document.body.classList.remove("is-loading");
   lenis?.start();
   const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
-  $$(".ht").forEach((el, i) => tl.fromTo(el._c, { yPercent: 105, "--w": 62 }, { yPercent: 0, "--w": 125, duration: 1.5, stagger: 0.035 }, i * 0.15));
-  tl.from(".tower", { yPercent: 100, duration: 1.4, stagger: 0.08, ease: "expo.out" }, 0.25)
-    .from(".nav", { opacity: 0, duration: 1 }, 0.3)
-    .from(".hero-top", { y: -20, opacity: 0, duration: 1 }, 0.3)
-    .from(".hero-lede, .hero-cta", { y: 30, opacity: 0, duration: 1, stagger: 0.1 }, 0.6);
+  // headline lands wide and settles condensed
+  $$(".ht").forEach((el, i) => tl.fromTo(el._c, { yPercent: 105, "--w": 125 }, { yPercent: 0, "--w": 62, duration: 1.6, stagger: 0.03 }, i * 0.12));
+  tl.from(".nav", { opacity: 0, duration: 1 }, 0.2)
+    .from(".hc-kicker, .hc-lede, .stamp, .hc-scroll", { y: 24, opacity: 0, duration: 1, stagger: 0.08 }, 0.35)
+    .from(".stage-hud", { opacity: 0, duration: 1 }, 0.6);
+  // the building time-lapses to completion
+  gsap.to(introP, { v: 5, duration: reduced ? 0 : 4.6, ease: "power1.inOut", delay: 0.3 });
+  $$(".stamp dd").forEach((dd, i) => {
+    const o = { v: 0 };
+    gsap.to(o, { v: +dd.dataset.to, duration: 1.6, delay: 0.7 + i * 0.1, ease: "power3.out", onUpdate: () => (dd.textContent = Math.round(o.v) + (dd.dataset.suf || "")) });
+  });
 }
 function preloader() {
   const pre = $(".pre");
