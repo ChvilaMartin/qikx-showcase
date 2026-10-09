@@ -1,6 +1,6 @@
-import { pictogram, fullLogo } from "./logos.js";
-import { BuildScene } from "./iso.js";
-import { EN } from "./i18n.js";
+import { pictogram, fullLogo } from "./logos.js?v=4";
+import { BuildScene } from "./iso.js?v=4";
+import { EN } from "./i18n.js?v=4";
 
 const { gsap, ScrollTrigger } = window;
 gsap.registerPlugin(ScrollTrigger);
@@ -128,24 +128,6 @@ function proximity(zone, getChars, min = 62, max = 125, radius = 260) {
 proximity($(".hero-copy"), () => $$(".ht .c"), 100, 62, 160);
 proximity($(".contact"), () => $$(".mega-l .c"), 62, 100, 220);
 
-/* ---------- nav ---------- */
-const nav = $(".nav");
-let lastY = 0;
-ScrollTrigger.create({
-  start: 0, end: "max",
-  onUpdate(self) {
-    const y = self.scroll();
-    nav.classList.toggle("solid", y > 30);
-    nav.classList.toggle("hide", y > 500 && y > lastY + 2);
-    if (y < lastY - 2) nav.classList.remove("hide");
-    lastY = y;
-  },
-});
-// created after the pinned sections (see bottom) so start/end include pin spacing
-const navDarkTriggers = () => $$(".dark, .careers").forEach((el) => ScrollTrigger.create({
-  trigger: el, start: "top 40px", end: "bottom 40px",
-  onToggle: (s) => nav.classList.toggle("on-dark", s.isActive),
-}));
 
 /* ---------- hero + build story (one pinned scene) ----------
    Pin progress q:   0 ──── REWIND ── START ─────────────── 1
@@ -246,7 +228,6 @@ function scrollAnims() {
   gsap.from(".co", { y: 50, opacity: 0, stagger: 0.08, duration: 1, ease: "power3.out", scrollTrigger: { trigger: ".co-list", start: "top 85%", once: true } });
 
   // metal: crane lift
-  const mm = gsap.matchMedia();
   const tonN = $(".ton-n"), steps = $$(".steps li");
   const load = $(".cr-load"), rope = $(".cr-rope"), trolley = $(".cr-trolley");
   const crane = (p) => {
@@ -260,12 +241,8 @@ function scrollAnims() {
     steps.forEach((s, i) => s.classList.toggle("on", p > (i + 0.5) / 5.5));
   };
   crane(0);
-  mm.add("(min-width: 901px)", () => {
-    ScrollTrigger.create({ trigger: ".metal", pin: ".metal-pin", start: "top top", end: "+=160%", scrub: 0.6, onUpdate: (s) => crane(s.progress) });
-  });
-  mm.add("(max-width: 900px)", () => {
-    ScrollTrigger.create({ trigger: ".metal", start: "top 70%", end: "bottom 60%", scrub: 0.6, onUpdate: (s) => crane(s.progress) });
-  });
+  // pinned on every screen size: the lift plays out while the section holds still
+  ScrollTrigger.create({ trigger: ".metal", pin: ".metal-pin", start: "top top", end: "+=160%", scrub: 0.6, onUpdate: (s) => crane(s.progress) });
 
   // contact mega
   $$(".mega-l").forEach((l, i) => gsap.fromTo(l._c, { yPercent: 105, "--w": 62 }, {
@@ -275,7 +252,6 @@ function scrollAnims() {
   gsap.from(".foot-logos > span", { y: 30, opacity: 0, stagger: 0.07, duration: 0.9, ease: "power3.out", scrollTrigger: { trigger: ".footer", start: "top 90%", once: true } });
 }
 scrollAnims();
-navDarkTriggers();
 
 /* ---------- preloader → hero ---------- */
 function intro() {
